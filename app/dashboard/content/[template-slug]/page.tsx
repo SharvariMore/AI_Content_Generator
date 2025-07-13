@@ -18,8 +18,8 @@ import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
 type Props = {
-  params?: {
-    "template-slug"?: string;
+  params: {
+    "template-slug": string;
   };
 };
 
@@ -32,9 +32,7 @@ function CreateNewContent({ params }: Props) {
   const { user } = useUser();
   const router = useRouter();
 
-  const selectedTemplate: TEMPLATE | undefined = Templates.find(
-    (item) => item.slug === params?.["template-slug"]
-  ) || Templates[0];
+ const selectedTemplate = Templates.find((t) => t.slug === params["template-slug"]);
 
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
