@@ -22,7 +22,7 @@ type PageProps = {
   };
 };
 
-function CreateNewContent({ params: PageProps }) {
+function CreateNewContent({ params}: PageProps) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
