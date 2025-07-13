@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -17,13 +16,13 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-type Props = {
+type PageProps = {
   params: {
     "template-slug": string;
   };
 };
 
-function CreateNewContent({ params }: Props) {
+export default function CreateNewContent({ params }: PageProps) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -32,7 +31,9 @@ function CreateNewContent({ params }: Props) {
   const { user } = useUser();
   const router = useRouter();
 
- const selectedTemplate = Templates.find((t) => t.slug === params["template-slug"]);
+  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
+    (item) => item.slug === params["template-slug"]
+  );
 
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
@@ -44,12 +45,12 @@ function CreateNewContent({ params }: Props) {
     setLoading(true);
     setAiOutput("");
 
-    const SelectedPrompt = selectedTemplate?.aiPrompt;
-    const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
+    const selectedPrompt = selectedTemplate?.aiPrompt;
+    const finalAIPrompt = JSON.stringify(formData) + "," + selectedPrompt;
 
     let fullResult = "";
 
-    await runGeminiStream(FinalAIPrompt, (chunk: string) => {
+    await runGeminiStream(finalAIPrompt, (chunk: string) => {
       fullResult += chunk;
       setAiOutput((prev) => prev + chunk);
     });
@@ -59,7 +60,7 @@ function CreateNewContent({ params }: Props) {
     setUpdateCreditUsage(Date.now());
   };
 
-  const saveInDb = async (formData: any, slug: any, aiResp: string) => {
+  const saveInDb = async (formData: string, slug: string | undefined, aiResp: string) => {
     await db.insert(AIOutput).values({
       formData,
       templateSlug: slug,
@@ -76,6 +77,7 @@ function CreateNewContent({ params }: Props) {
           <ArrowLeft /> Back
         </Button>
       </Link>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-5">
         <FormSection
           selectedTemplate={selectedTemplate}
@@ -89,5 +91,3 @@ function CreateNewContent({ params }: Props) {
     </div>
   );
 }
-
-export default CreateNewContent;
