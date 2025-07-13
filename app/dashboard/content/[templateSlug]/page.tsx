@@ -16,11 +16,13 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-interface PROPS {
+type PageProps = {
+  params: {
     templateSlug: string;
-}
+  };
+};
 
-function CreateNewContent({ params }: { params: PROPS }) {
+function CreateNewContent({ params: PageProps }) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -33,7 +35,7 @@ function CreateNewContent({ params }: { params: PROPS }) {
 
   const router = useRouter();
 
-const selectedTemplate: TEMPLATE | undefined = Templates?.find(
+const selectedTemplate: TEMPLATE | undefined = Templates.find(
   (item) => item.slug === params.templateSlug
 );
 
