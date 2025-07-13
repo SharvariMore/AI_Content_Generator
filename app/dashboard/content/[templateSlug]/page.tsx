@@ -20,7 +20,7 @@ interface PROPS {
     templateSlug: string;
 }
 
-function CreateNewContent({ params }: { params: templateSlugProps }) {
+function CreateNewContent({ params }: { params: PROPS }) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
