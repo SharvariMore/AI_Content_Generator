@@ -18,7 +18,7 @@ import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageConte
 
 type Props = {
   params: {
-    "template-slug": string;
+    templateSlug: string; // ✅ updated to camelCase
   };
 };
 
@@ -28,12 +28,11 @@ export default function CreateNewContent({ params }: Props) {
 
   const { totalUsage } = useContext(TotalUsageContext);
   const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
-
   const { user } = useUser();
   const router = useRouter();
 
   const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug === params["template-slug"]
+    (item) => item.slug === params.templateSlug // ✅ updated access
   );
 
   const generateAIContent = async (formData: any) => {
