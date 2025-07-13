@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -16,28 +17,23 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-type PageProps = {
-  params: {
-    templateSlug: string;
-  };
-};
-
-function CreateNewContent({ params}: PageProps) {
+export default function CreateNewContent({
+  params,
+}: {
+  params: { templateSlug: string };
+}) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
-  const { totalUsage, setTotalUsage } = useContext(TotalUsageContext);
-  const { updateCreditUsage, setUpdateCreditUsage } = useContext(
-    UpdateCreditUsageContext
-  );
+  const { totalUsage } = useContext(TotalUsageContext);
+  const { updateCreditUsage, setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
 
   const { user } = useUser();
-
   const router = useRouter();
 
-const selectedTemplate: TEMPLATE | undefined = Templates.find(
-  (item) => item.slug === params.templateSlug
-);
+  const selectedTemplate: TEMPLATE | undefined = Templates.find(
+    (item) => item.slug === params.templateSlug
+  );
 
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
@@ -45,11 +41,11 @@ const selectedTemplate: TEMPLATE | undefined = Templates.find(
       console.log("Please Upgrade!");
       return;
     }
+
     setLoading(true);
     setAiOutput("");
 
     const SelectedPrompt = selectedTemplate?.aiPrompt;
-
     const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
 
     let fullResult = "";
@@ -64,25 +60,25 @@ const selectedTemplate: TEMPLATE | undefined = Templates.find(
       selectedTemplate?.slug,
       fullResult
     );
+
     setLoading(false);
     setUpdateCreditUsage(Date.now());
   };
 
   const saveInDb = async (formData: any, slug: any, aiResp: string) => {
-    const result = await db.insert(AIOutput).values({
+    await db.insert(AIOutput).values({
       formData: formData,
       templateSlug: slug,
       aiResponse: aiResp,
-      createdBy: user?.primaryEmailAddress?.emailAddress,
+      createdBy: user?.primaryEmailAddress?.emailAddress ?? "unknown",
       createdAt: moment().format("MM/DD/yyyy"),
     });
   };
 
   return (
     <div className="p-10">
-      <Link href={"/dashboard"}>
+      <Link href="/dashboard">
         <Button className="cursor-pointer">
-          {" "}
           <ArrowLeft /> Back
         </Button>
       </Link>
@@ -92,7 +88,6 @@ const selectedTemplate: TEMPLATE | undefined = Templates.find(
           userFormInput={(v: any) => generateAIContent(v)}
           loading={loading}
         />
-
         <div className="col-span-2">
           <OutputSection aiOutput={aiOutput} />
         </div>
@@ -100,5 +95,3 @@ const selectedTemplate: TEMPLATE | undefined = Templates.find(
     </div>
   );
 }
-
-export default CreateNewContent;
