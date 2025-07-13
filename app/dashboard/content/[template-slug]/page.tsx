@@ -16,11 +16,13 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-export default function CreateNewContent({
-  params,
-}: {
-  params: { "template-slug": string };
-}) {
+type Props = {
+  params: {
+    "template-slug": string;
+  };
+};
+
+export default function CreateNewContent({ params }: Props) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -37,7 +39,6 @@ export default function CreateNewContent({
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
       router.push("/dashboard/billing");
-      console.log("Please Upgrade!");
       return;
     }
 
@@ -53,24 +54,16 @@ export default function CreateNewContent({
       setAiOutput((prev) => prev + chunk);
     });
 
-    await saveInDb(
-      JSON.stringify(formData),
-      selectedTemplate?.slug,
-      fullResult
-    );
-
-    setLoading(false);
-    setUpdateCreditUsage(Date.now());
-  };
-
-  const saveInDb = async (formData: any, slug: any, aiResp: string) => {
     await db.insert(AIOutput).values({
-      formData,
-      templateSlug: slug,
-      aiResponse: aiResp,
+      formData: JSON.stringify(formData),
+      templateSlug: selectedTemplate?.slug,
+      aiResponse: fullResult,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       createdAt: moment().format("MM/DD/yyyy"),
     });
+
+    setLoading(false);
+    setUpdateCreditUsage(Date.now());
   };
 
   return (
@@ -84,7 +77,7 @@ export default function CreateNewContent({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-5">
         <FormSection
           selectedTemplate={selectedTemplate}
-          userFormInput={(v: any) => generateAIContent(v)}
+          userFormInput={generateAIContent}
           loading={loading}
         />
         <div className="col-span-2">
