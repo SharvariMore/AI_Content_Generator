@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -16,22 +17,21 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-type Props = {
-  params: {
-    templateSlug: string;
-  };
-};
-
-export default function CreateNewContent({ params }: Props) {
+export default function CreateNewContent({
+  params,
+}: {
+  params: { templateSlug: string };
+}) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
   const { totalUsage } = useContext(TotalUsageContext);
   const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
+
   const { user } = useUser();
   const router = useRouter();
 
-  const selectedTemplate: TEMPLATE | undefined = Templates.find(
+  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
     (item) => item.slug === params.templateSlug
   );
 
@@ -44,18 +44,19 @@ export default function CreateNewContent({ params }: Props) {
     setLoading(true);
     setAiOutput("");
 
-    const prompt = JSON.stringify(formData) + "," + selectedTemplate?.aiPrompt;
-    let result = "";
+    const SelectedPrompt = selectedTemplate?.aiPrompt;
+    const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
+    let fullResult = "";
 
-    await runGeminiStream(prompt, (chunk: string) => {
-      result += chunk;
+    await runGeminiStream(FinalAIPrompt, (chunk: string) => {
+      fullResult += chunk;
       setAiOutput((prev) => prev + chunk);
     });
 
     await db.insert(AIOutput).values({
       formData: JSON.stringify(formData),
       templateSlug: selectedTemplate?.slug,
-      aiResponse: result,
+      aiResponse: fullResult,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       createdAt: moment().format("MM/DD/yyyy"),
     });
@@ -67,8 +68,8 @@ export default function CreateNewContent({ params }: Props) {
   return (
     <div className="p-10">
       <Link href="/dashboard">
-        <Button>
-          <ArrowLeft className="mr-2" /> Back
+        <Button className="cursor-pointer">
+          <ArrowLeft /> Back
         </Button>
       </Link>
 
