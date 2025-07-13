@@ -17,11 +17,14 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-export default function CreateNewContent({
-  params,
-}: {
-  params: { templateSlug: string };
-}) {
+interface PageProps {
+  params: {
+    templateSlug: string;
+  };
+}
+
+export default function CreateNewContent({ params }: PageProps) {
+  const { templateSlug } = params;
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -32,7 +35,7 @@ export default function CreateNewContent({
   const router = useRouter();
 
   const selectedTemplate: TEMPLATE | undefined = Templates.find(
-    (item) => item.slug === params.templateSlug
+    (item) => item.slug === templateSlug
   );
 
   const generateAIContent = async (formData: any) => {
@@ -67,10 +70,10 @@ export default function CreateNewContent({
 
   const saveInDb = async (formData: any, slug: any, aiResp: string) => {
     await db.insert(AIOutput).values({
-      formData: formData,
+      formData,
       templateSlug: slug,
       aiResponse: aiResp,
-      createdBy: user?.primaryEmailAddress?.emailAddress ?? "unknown",
+      createdBy: user?.primaryEmailAddress?.emailAddress ?? "",
       createdAt: moment().format("MM/DD/yyyy"),
     });
   };
@@ -82,10 +85,11 @@ export default function CreateNewContent({
           <ArrowLeft /> Back
         </Button>
       </Link>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-5">
         <FormSection
           selectedTemplate={selectedTemplate}
-          userFormInput={(v: any) => generateAIContent(v)}
+          userFormInput={generateAIContent}
           loading={loading}
         />
         <div className="col-span-2">
