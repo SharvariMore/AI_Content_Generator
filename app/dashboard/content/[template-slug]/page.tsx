@@ -16,18 +16,17 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-type PageProps = {
-  params: {
-    "template-slug": string;
-  };
-};
-
-export default function CreateNewContent({ params }: PageProps) {
+export default function CreateNewContent({
+  params,
+}: {
+  params: { "template-slug": string };
+}) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
-  const { totalUsage, setTotalUsage } = useContext(TotalUsageContext);
-  const { updateCreditUsage, setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
+  const { totalUsage } = useContext(TotalUsageContext);
+  const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
+
   const { user } = useUser();
   const router = useRouter();
 
@@ -45,22 +44,26 @@ export default function CreateNewContent({ params }: PageProps) {
     setLoading(true);
     setAiOutput("");
 
-    const selectedPrompt = selectedTemplate?.aiPrompt;
-    const finalAIPrompt = JSON.stringify(formData) + "," + selectedPrompt;
-
+    const SelectedPrompt = selectedTemplate?.aiPrompt;
+    const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
     let fullResult = "";
 
-    await runGeminiStream(finalAIPrompt, (chunk: string) => {
+    await runGeminiStream(FinalAIPrompt, (chunk: string) => {
       fullResult += chunk;
       setAiOutput((prev) => prev + chunk);
     });
 
-    await saveInDb(JSON.stringify(formData), selectedTemplate?.slug, fullResult);
+    await saveInDb(
+      JSON.stringify(formData),
+      selectedTemplate?.slug,
+      fullResult
+    );
+
     setLoading(false);
     setUpdateCreditUsage(Date.now());
   };
 
-  const saveInDb = async (formData: string, slug: string | undefined, aiResp: string) => {
+  const saveInDb = async (formData: any, slug: any, aiResp: string) => {
     await db.insert(AIOutput).values({
       formData,
       templateSlug: slug,
