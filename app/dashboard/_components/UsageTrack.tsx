@@ -27,11 +27,14 @@ function UsageTrack() {
   }, [updateCreditUsage && user]);
 
   const getData = async () => {
+    const email = user?.primaryEmailAddress?.emailAddress;
+
+    if (!email) return;
     {/* @ts-ignore*/}
     const result: HISTORY[] = await db
       .select()
       .from(AIOutput)
-      .where(eq(AIOutput.createdBy, user?.primaryEmailAddress?.emailAddress));
+      .where(eq(AIOutput.createdBy, email));
 
     getTotalUsage(result);
   };
