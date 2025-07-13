@@ -33,9 +33,9 @@ function CreateNewContent({ params }: { params: PROPS }) {
 
   const router = useRouter();
 
-  const selectedTemplate: Templates?.find(
-    (item) => item.slug == params.templateSlug
-  );
+const selectedTemplate: TEMPLATE | undefined = Templates?.find(
+  (item) => item.slug === params.templateSlug
+);
 
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
