@@ -16,11 +16,17 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-export default function Page({
-  params,
-}: {
-  params: { "template-slug": string };
-}) {
+interface PROPS {
+  params: {
+    "template-slug": string;
+  };
+}
+/**
+ *
+ * @param {PROPS} props
+ * @return {*}
+ */
+function CreateNewContent(props: PROPS): any {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -30,10 +36,11 @@ export default function Page({
   );
 
   const { user } = useUser();
+
   const router = useRouter();
 
   const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug === params["template-slug"]
+    (item) => item.slug == props.params["template-slug"]
   );
 
   const generateAIContent = async (formData: any) => {
@@ -42,11 +49,11 @@ export default function Page({
       console.log("Please Upgrade!");
       return;
     }
-
     setLoading(true);
     setAiOutput("");
 
     const SelectedPrompt = selectedTemplate?.aiPrompt;
+
     const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
 
     let fullResult = "";
@@ -61,13 +68,12 @@ export default function Page({
       selectedTemplate?.slug,
       fullResult
     );
-
     setLoading(false);
     setUpdateCreditUsage(Date.now());
   };
 
   const saveInDb = async (formData: any, slug: any, aiResp: string) => {
-    await db.insert(AIOutput).values({
+    const result = await db.insert(AIOutput).values({
       formData: formData,
       templateSlug: slug,
       aiResponse: aiResp,
@@ -80,10 +86,10 @@ export default function Page({
     <div className="p-10">
       <Link href={"/dashboard"}>
         <Button className="cursor-pointer">
+          {" "}
           <ArrowLeft /> Back
         </Button>
       </Link>
-
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-5">
         <FormSection
           selectedTemplate={selectedTemplate}
@@ -98,3 +104,5 @@ export default function Page({
     </div>
   );
 }
+
+export default CreateNewContent;
