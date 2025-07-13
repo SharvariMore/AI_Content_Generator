@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -16,23 +17,22 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-type Props = {
-  params: {
-    templateSlug: string; // ✅ updated to camelCase
-  };
-};
-
-export default function CreateNewContent({ params }: Props) {
+export default function CreateNewContent({
+  params,
+}: {
+  params: { templateSlug: string };
+}) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
   const { totalUsage } = useContext(TotalUsageContext);
   const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
+
   const { user } = useUser();
   const router = useRouter();
 
   const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug === params.templateSlug // ✅ updated access
+    (item) => item.slug === params.templateSlug
   );
 
   const generateAIContent = async (formData: any) => {
