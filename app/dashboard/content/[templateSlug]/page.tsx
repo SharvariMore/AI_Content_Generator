@@ -17,17 +17,10 @@ import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
 interface PROPS {
-  params: {
-    "template-slug": string;
-  };
+    templateSlug: string;
 }
-/**
- *
- * 
- * @param {PROPS} props
- * @return {*}
- */
-function CreateNewContent(props: PROPS) {
+
+function CreateNewContent({ params }: { params: templateSlugProps }) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -40,8 +33,8 @@ function CreateNewContent(props: PROPS) {
 
   const router = useRouter();
 
-  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug == props.params["template-slug"]
+  const selectedTemplate: Templates?.find(
+    (item) => item.slug == params.templateSlug
   );
 
   const generateAIContent = async (formData: any) => {
