@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -17,21 +16,22 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-export default function CreateNewContent({
-  params,
-}: {
-  params: { templateSlug: string };
-}) {
+type Props = {
+  params: {
+    templateSlug: string;
+  };
+};
+
+export default function CreateNewContent({ params }: Props) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
   const { totalUsage } = useContext(TotalUsageContext);
   const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
-
   const { user } = useUser();
   const router = useRouter();
 
-  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
+  const selectedTemplate: TEMPLATE | undefined = Templates.find(
     (item) => item.slug === params.templateSlug
   );
 
@@ -44,19 +44,18 @@ export default function CreateNewContent({
     setLoading(true);
     setAiOutput("");
 
-    const SelectedPrompt = selectedTemplate?.aiPrompt;
-    const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
-    let fullResult = "";
+    const prompt = JSON.stringify(formData) + "," + selectedTemplate?.aiPrompt;
+    let result = "";
 
-    await runGeminiStream(FinalAIPrompt, (chunk: string) => {
-      fullResult += chunk;
+    await runGeminiStream(prompt, (chunk: string) => {
+      result += chunk;
       setAiOutput((prev) => prev + chunk);
     });
 
     await db.insert(AIOutput).values({
       formData: JSON.stringify(formData),
       templateSlug: selectedTemplate?.slug,
-      aiResponse: fullResult,
+      aiResponse: result,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       createdAt: moment().format("MM/DD/yyyy"),
     });
@@ -68,8 +67,8 @@ export default function CreateNewContent({
   return (
     <div className="p-10">
       <Link href="/dashboard">
-        <Button className="cursor-pointer">
-          <ArrowLeft /> Back
+        <Button>
+          <ArrowLeft className="mr-2" /> Back
         </Button>
       </Link>
 
