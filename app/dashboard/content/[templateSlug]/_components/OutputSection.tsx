@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { Document, Packer, Paragraph } from "docx";
 import { saveAs } from "file-saver";
-import { toast } from "sonner"; // ✅ import toast
+import { toast } from "sonner";
 
 interface PROPS {
   aiOutput: string;
@@ -31,12 +31,12 @@ const exportToWord = async (content: string, templateName: string) => {
 };
 
 function OutputSection({ aiOutput }: PROPS) {
-  const editorRef: any = useRef();
+  const editorRef = useRef<Editor>(null);
   const [showModal, setShowModal] = useState(false);
   const [pendingContent, setPendingContent] = useState("");
 
   useEffect(() => {
-    const editorInstance = editorRef.current.getInstance();
+    const editorInstance = editorRef.current?.getInstance();
     editorInstance.setMarkdown(aiOutput);
   }, [aiOutput]);
 
@@ -68,7 +68,7 @@ function OutputSection({ aiOutput }: PROPS) {
         initialEditType="wysiwyg"
         useCommandShortcut={true}
         onChange={() =>
-          console.log(editorRef.current.getInstance().getMarkdown())
+          console.log(editorRef.current?.getInstance().getMarkdown())
         }
       />
 
