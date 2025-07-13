@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -16,28 +17,24 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-interface PROPS {
-  params: {
-    "template-slug": string;
+type Props = {
+  params?: {
+    "template-slug"?: string;
   };
-}
+};
 
-function CreateNewContent(props: PROPS) {
+function CreateNewContent({ params }: Props) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
   const { totalUsage, setTotalUsage } = useContext(TotalUsageContext);
-  const { updateCreditUsage, setUpdateCreditUsage } = useContext(
-    UpdateCreditUsageContext
-  );
-
+  const { updateCreditUsage, setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
   const { user } = useUser();
-
   const router = useRouter();
 
-  const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug == props.params["template-slug"]
-  );
+  const selectedTemplate: TEMPLATE | undefined = Templates.find(
+    (item) => item.slug === params?.["template-slug"]
+  ) || Templates[0];
 
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
@@ -45,11 +42,11 @@ function CreateNewContent(props: PROPS) {
       console.log("Please Upgrade!");
       return;
     }
+
     setLoading(true);
     setAiOutput("");
 
     const SelectedPrompt = selectedTemplate?.aiPrompt;
-
     const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
 
     let fullResult = "";
@@ -59,18 +56,14 @@ function CreateNewContent(props: PROPS) {
       setAiOutput((prev) => prev + chunk);
     });
 
-    await saveInDb(
-      JSON.stringify(formData),
-      selectedTemplate?.slug,
-      fullResult
-    );
+    await saveInDb(JSON.stringify(formData), selectedTemplate?.slug, fullResult);
     setLoading(false);
     setUpdateCreditUsage(Date.now());
   };
 
   const saveInDb = async (formData: any, slug: any, aiResp: string) => {
-    const result = await db.insert(AIOutput).values({
-      formData: formData,
+    await db.insert(AIOutput).values({
+      formData,
       templateSlug: slug,
       aiResponse: aiResp,
       createdBy: user?.primaryEmailAddress?.emailAddress,
@@ -80,9 +73,8 @@ function CreateNewContent(props: PROPS) {
 
   return (
     <div className="p-10">
-      <Link href={"/dashboard"}>
+      <Link href="/dashboard">
         <Button className="cursor-pointer">
-          {" "}
           <ArrowLeft /> Back
         </Button>
       </Link>
@@ -92,7 +84,6 @@ function CreateNewContent(props: PROPS) {
           userFormInput={(v: any) => generateAIContent(v)}
           loading={loading}
         />
-
         <div className="col-span-2">
           <OutputSection aiOutput={aiOutput} />
         </div>
