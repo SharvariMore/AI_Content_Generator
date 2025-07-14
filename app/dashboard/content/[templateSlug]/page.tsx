@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useContext, useState } from "react";
 import FormSection from "./_components/FormSection";
 import OutputSection from "./_components/OutputSection";
@@ -16,13 +17,13 @@ import { TotalUsageContext } from "@/app/(context)/TotalUsageContext";
 import { useRouter } from "next/navigation";
 import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageContext";
 
-interface Props {
+interface PageProps {
   params: {
     templateSlug: string;
   };
 }
 
-function CreateNewContent({ params }: Props) {
+export default function CreateNewContent({ params }: PageProps) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
 
@@ -42,36 +43,40 @@ function CreateNewContent({ params }: Props) {
       console.log("Please Upgrade!");
       return;
     }
-
     setLoading(true);
     setAiOutput("");
 
-    const selectedPrompt = selectedTemplate?.aiPrompt;
-    const finalPrompt = `${JSON.stringify(formData)},${selectedPrompt}`;
+    const SelectedPrompt = selectedTemplate?.aiPrompt;
+    const FinalAIPrompt = JSON.stringify(formData) + "," + SelectedPrompt;
+
     let fullResult = "";
 
-    await runGeminiStream(finalPrompt, (chunk: string) => {
+    await runGeminiStream(FinalAIPrompt, (chunk: string) => {
       fullResult += chunk;
       setAiOutput((prev) => prev + chunk);
     });
 
+    await saveInDb(JSON.stringify(formData), selectedTemplate?.slug, fullResult);
+    setLoading(false);
+    setUpdateCreditUsage(Date.now());
+  };
+
+  const saveInDb = async (formData: any, slug: string | undefined, aiResp: string) => {
     await db.insert(AIOutput).values({
-      formData: JSON.stringify(formData),
-      templateSlug: selectedTemplate?.slug,
-      aiResponse: fullResult,
+      formData,
+      templateSlug: slug,
+      aiResponse: aiResp,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       createdAt: moment().format("MM/DD/yyyy"),
     });
-
-    setLoading(false);
-    setUpdateCreditUsage(Date.now());
   };
 
   return (
     <div className="p-10">
       <Link href={"/dashboard"}>
         <Button className="cursor-pointer">
-          <ArrowLeft className="mr-2" /> Back
+          <ArrowLeft className="mr-2" />
+          Back
         </Button>
       </Link>
 
@@ -89,5 +94,3 @@ function CreateNewContent({ params }: Props) {
     </div>
   );
 }
-
-export default CreateNewContent;
