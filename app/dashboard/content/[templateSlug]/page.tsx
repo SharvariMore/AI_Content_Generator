@@ -16,13 +16,13 @@ import { TotalUsageContext } from '@/app/(context)/TotalUsageContext';
 import { useRouter } from 'next/navigation';
 import { UpdateCreditUsageContext } from '@/app/(context)/UpdateCreditUsageContext';
 
-interface PageProps {
+interface PROPS {
   params: {
     templateSlug: string;
   };
 }
 
-export default function Page({ params }: PageProps) {
+export default function Page({ params }: PROPS) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>('');
 
