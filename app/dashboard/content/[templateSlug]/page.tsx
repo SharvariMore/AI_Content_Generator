@@ -21,11 +21,7 @@ interface PROPS {
     templateSlug: string;
   };
 }
-/**
- *
- * @param {PROPS} props
- * @return {*}
- */
+
 function CreateNewContent(props: PROPS) {
   const [loading, setLoading] = useState(false);
   const [aiOutput, setAiOutput] = useState<string>("");
