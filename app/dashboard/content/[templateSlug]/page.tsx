@@ -18,7 +18,7 @@ import { UpdateCreditUsageContext } from "@/app/(context)/UpdateCreditUsageConte
 
 interface PROPS {
   params: {
-    "template-slug": string;
+    templateSlug: string;
   };
 }
 /**
@@ -40,7 +40,7 @@ function CreateNewContent(props: PROPS) {
   const router = useRouter();
 
   const selectedTemplate: TEMPLATE | undefined = Templates?.find(
-    (item) => item.slug == props.params["template-slug"]
+    (item) => item.slug == props.params.templateSlug
   );
 
   const generateAIContent = async (formData: any) => {
