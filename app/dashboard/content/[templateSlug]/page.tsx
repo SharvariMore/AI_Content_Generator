@@ -1,6 +1,4 @@
-import dynamic from "next/dynamic";
-
-const CreateNewContent = dynamic(() => import("./ClientPage"), { ssr: false });
+import CreateNewContent from "./ClientPage";
 
 interface PageProps {
   params: {
