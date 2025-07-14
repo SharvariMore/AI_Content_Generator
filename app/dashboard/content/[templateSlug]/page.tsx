@@ -1,53 +1,50 @@
 'use client';
 import React, { useContext, useState } from 'react';
-import FormSection from './_components/FormSection';
-import OutputSection from './_components/OutputSection';
-import { TEMPLATE } from '../../_components/TemplateListSection';
-import Templates from '@/app/(data)/Templates';
+import { useUser } from '@clerk/nextjs';
+import { useRouter } from 'next/navigation';
+import moment from 'moment';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import Templates from '@/app/(data)/Templates';
+import { TEMPLATE } from '@/app/_components/TemplateListSection';
+import FormSection from './_components/FormSection';
+import OutputSection from './_components/OutputSection';
 import { runGeminiStream } from '@/utils/AiModal';
 import { db } from '@/utils/db';
 import { AIOutput } from '@/utils/schema';
-import { useUser } from '@clerk/nextjs';
-import moment from 'moment';
 import { TotalUsageContext } from '@/app/(context)/TotalUsageContext';
-import { useRouter } from 'next/navigation';
 import { UpdateCreditUsageContext } from '@/app/(context)/UpdateCreditUsageContext';
 
-interface PROPS {
-  params: {
-    templateSlug: string;
-  };
+interface PageProps {
+  params: Promise<{ templateSlug: string }>;
 }
 
-export default function Page({ params }: PROPS) {
-  const [loading, setLoading] = useState(false);
-  const [aiOutput, setAiOutput] = useState<string>('');
+export default async function Page({ params }: PageProps) {
+  const resolvedParams = await params;
 
-  const { totalUsage, setTotalUsage } = useContext(TotalUsageContext);
-  const { updateCreditUsage, setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
+  const [loading, setLoading] = useState(false);
+  const [aiOutput, setAiOutput] = useState('');
   const { user } = useUser();
   const router = useRouter();
+  const { totalUsage } = useContext(TotalUsageContext);
+  const { setUpdateCreditUsage } = useContext(UpdateCreditUsageContext);
 
   const selectedTemplate: TEMPLATE | undefined = Templates.find(
-    (item) => item.slug === params.templateSlug
+    (item) => item.slug === resolvedParams.templateSlug
   );
 
   const generateAIContent = async (formData: any) => {
     if (totalUsage >= 10000) {
       router.push('/dashboard/billing');
-      console.log('Please Upgrade!');
       return;
     }
 
     setLoading(true);
     setAiOutput('');
 
-    const selectedPrompt = selectedTemplate?.aiPrompt;
-    const finalPrompt = JSON.stringify(formData) + ',' + selectedPrompt;
-
+    const finalPrompt =
+      JSON.stringify(formData) + ',' + selectedTemplate?.aiPrompt;
     let fullResult = '';
 
     await runGeminiStream(finalPrompt, (chunk: string) => {
@@ -55,28 +52,26 @@ export default function Page({ params }: PROPS) {
       setAiOutput((prev) => prev + chunk);
     });
 
-    await saveInDb(JSON.stringify(formData), selectedTemplate?.slug, fullResult);
-    setLoading(false);
-    setUpdateCreditUsage(Date.now());
-  };
-
-  const saveInDb = async (formData: string, slug: string | undefined, aiResp: string) => {
     await db.insert(AIOutput).values({
-      formData,
-      templateSlug: slug,
-      aiResponse: aiResp,
+      formData: JSON.stringify(formData),
+      templateSlug: selectedTemplate?.slug,
+      aiResponse: fullResult,
       createdBy: user?.primaryEmailAddress?.emailAddress,
       createdAt: moment().format('MM/DD/yyyy'),
     });
+
+    setLoading(false);
+    setUpdateCreditUsage(Date.now());
   };
 
   return (
     <div className="p-10">
       <Link href="/dashboard">
         <Button className="cursor-pointer">
-          <ArrowLeft /> Back
+          <ArrowLeft className="mr-2" /> Back
         </Button>
       </Link>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5 py-5">
         <FormSection
           selectedTemplate={selectedTemplate}
