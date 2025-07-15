@@ -19,7 +19,7 @@ export interface FORM {
   required?: boolean;
 }
 
-function TemplateListSection({ userSearchInput }: any) {
+function TemplateListSection({ userSearchInput }: { userSearchInput: string }) {
   const [templateList, setTemplateList] = useState(Templates);
 
   useEffect(() => {
@@ -37,12 +37,14 @@ function TemplateListSection({ userSearchInput }: any) {
     <div className="p-10">
       {templateList.length > 0 ? (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-          {templateList.map((item: TEMPLATE, index: number) => (
-            <TemplateCard key={index} {...item} />
+          {templateList.map((item, index) => (
+            <TemplateCard key={index} item={item} />
           ))}
         </div>
       ) : (
-        <p className="text-center text-gray-600 font-semibold text-lg"> ☹️ No Templates Found!</p>
+        <p className="text-center text-gray-600 font-semibold text-lg">
+          ☹️ No Templates Found!
+        </p>
       )}
     </div>
   );
