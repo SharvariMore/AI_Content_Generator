@@ -7,7 +7,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Templates from '@/app/(data)/Templates';
-import { TEMPLATE } from '@/app/_components/TemplateListSection';
+import { TEMPLATE } from "../../_components/TemplateListSection";
 import FormSection from './_components/FormSection';
 import OutputSection from './_components/OutputSection';
 import { runGeminiStream } from '@/utils/AiModal';
