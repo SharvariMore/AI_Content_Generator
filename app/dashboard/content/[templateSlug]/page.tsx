@@ -52,6 +52,11 @@ export default async function Page({ params }: PageProps) {
       setAiOutput((prev) => prev + chunk);
     });
 
+
+    if (!selectedTemplate?.slug) {
+      throw new Error("Template slug is missing");
+    }
+    
     await db.insert(AIOutput).values({
       formData: JSON.stringify(formData),
       templateSlug: selectedTemplate?.slug,
