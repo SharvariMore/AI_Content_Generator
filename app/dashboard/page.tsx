@@ -11,7 +11,7 @@ function Dashboard() {
         onSearchInput={(value: string) => setUserSearchInput(value)}
       />
 
-     <TemplateListSection userSearchInput={userSearchInput ?? ""} />
+      <TemplateListSection userSearchInput={userSearchInput} />
     </div>
   );
 }
